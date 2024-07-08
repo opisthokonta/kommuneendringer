@@ -1,6 +1,8 @@
 
 
 
+# Particular cases ----
+
 
 # Halden: Never merged or split, but changed county (and knr) in 2020 and 2024.
 
@@ -183,6 +185,118 @@ test_that("Egersund", {
   expect_true(translate_knr(knr = '1101', from_date = '2005-01-01', to_date = '1977-01-01') == '1101')
   expect_true(translate_knr(knr = '1101', from_date = '2024-01-01', to_date = '1977-01-01') == '1101')
 
+})
+
+
+# Check changes against kommuneinndelinger ----
+
+
+years <- unique(kommuneinndelinger$year)
+
+kommuneinndelinger_split <- split(kommuneinndelinger, f = kommuneinndelinger$year)
+
+
+# Check that there are no change within versions.
+
+no_change <- logical(length(years)-1)
+
+for (ii in 1:(length(years)-1)){
+
+  n_municip <- length(kommuneinndelinger_split[[ii]]$code)
+
+  start_date <- paste0(years[ii], '-01-01')
+  end_date <- paste0(as.numeric(years[ii+1])-1, '-12-31')
+
+  translated_codes <- translate_knr(kommuneinndelinger_split[[ii]]$code,
+                      from_date = rep(start_date, n_municip),
+                      to_date = rep(end_date, n_municip))
+
+  # Check that no change has happened
+  no_change[ii] <- all(translated_codes == kommuneinndelinger_split[[ii]]$code)
+}
+
+
+test_that("No change within version", {
+  expect_true(all(no_change))
+})
+
+
+
+
+# Check changes between versions.
+
+
+translated_codes_in_next <- logical(length(years)-1)
+codes_in_translated <- logical(length(years)-1)
+translation_length_ok <- logical(length(years)-1)
+
+for (ii in 1:(length(years)-1)){
+
+  n_municip <- length(kommuneinndelinger_split[[ii]]$code)
+
+  start_date <- paste0(years[ii], '-01-01')
+  end_date <- paste0(years[ii+1], '-01-01')
+
+  translated_codes <- translate_knr(kommuneinndelinger_split[[ii]]$code,
+                                    from_date = rep(start_date, n_municip),
+                                    to_date = rep(end_date, n_municip),
+                                    show_warnings = FALSE)
+
+  # Look only at unique codes, as merged municipalities will be present several times.
+  translated_codes_unique <- unique(translated_codes)
+
+  # Na omit since split municipalities returns NA. Should not occur before 2020.
+  translated_codes_unique_na_omit <- na.omit(unique(translated_codes))
+
+
+
+  # NA omit in 2019 & 2023, since the splits occured in 2020 and 2024.
+  if (years[ii] %in% c('2019', '2023')){
+
+    # Check that all translated codes are in the new kommuneinndeling
+    translated_codes_in_next[ii] <- all(translated_codes_unique_na_omit %in% kommuneinndelinger_split[[ii+1]]$code)
+
+    # Check that all codes in the new kommuneinndeling are in the translated codes
+
+    if (years[ii] == '2023'){
+
+      # This is not needed for 2019, because the sucessor municipalities of the split are represented
+      # because they are merged with other municipalities.
+
+      codes_to_not_check <- c('1508', '1580') # Do not check the new split Aalesund & Haram
+      codes_to_check <- kommuneinndelinger_split[[ii+1]]$code
+      codes_to_check <- codes_to_check[!codes_to_check %in% codes_to_not_check]
+
+      codes_in_translated[ii] <- all((codes_to_check %in% translated_codes_unique_na_omit))
+
+    } else {
+      codes_in_translated[ii] <- all((kommuneinndelinger_split[[ii+1]]$code %in% translated_codes_unique_na_omit))
+    }
+
+    # Should NOT be of equal length, when splits occur.
+    translation_length_ok[ii] <- length(translated_codes_unique) != nrow(kommuneinndelinger_split[[ii+1]])
+
+  } else {
+
+    # Check that all translated codes are in the new kommuneinndeling
+    translated_codes_in_next[ii] <- all(translated_codes_unique %in% kommuneinndelinger_split[[ii+1]]$code)
+
+    # Check that all codes in the new kommuneinndeling are in the translated codes
+    codes_in_translated[ii] <- all((kommuneinndelinger_split[[ii+1]]$code %in% translated_codes_unique))
+
+    translation_length_ok[ii] <- length(translated_codes_unique) == nrow(kommuneinndelinger_split[[ii+1]])
+  }
+
+
+}
+
+
+
+
+test_that("Expected changes between versions", {
+  expect_true(all(translated_codes_in_next))
+  expect_true(all(codes_in_translated))
+  expect_true(all(translation_length_ok))
 })
 
 
