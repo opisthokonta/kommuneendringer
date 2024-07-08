@@ -146,12 +146,14 @@ translate_knr_internal <- function(knr, from_date, to_date, show_warnings = TRUE
 translate_knr <- function(knr, from_date, to_date, show_warnings = TRUE){
 
 
-  # All input must have same length
-  stopifnot(length(knr) == length(from_date),
-            length(from_date) == length(to_date),
+  # # All input must have same length
+  # stopifnot(length(knr) == length(from_date),
+  #           length(from_date) == length(to_date),
+  #           length(show_warnings) == 1)
+
+  stopifnot(length(from_date) == length(knr) | length(from_date) == 1,
+            length(to_date) == length(knr) | length(to_date) == 1,
             length(show_warnings) == 1)
-
-
 
   # Check types
   stopifnot(is.character(knr),
@@ -162,6 +164,14 @@ translate_knr <- function(knr, from_date, to_date, show_warnings = TRUE){
   # Coerce to Date.
   from_date <- as.Date(from_date)
   to_date <- as.Date(to_date)
+
+  if (length(from_date) == 1){
+    from_date <- rep(from_date, length(knr))
+  }
+
+  if (length(to_date) == 1){
+    to_date <- rep(to_date, length(knr))
+  }
 
   # Check the date ranges
   if (any(from_date < as.Date('1977-01-01')) | any(from_date > as.Date('2034-01-01'))){

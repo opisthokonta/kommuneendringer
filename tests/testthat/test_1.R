@@ -208,8 +208,10 @@ for (ii in 1:(length(years)-1)){
   end_date <- paste0(as.numeric(years[ii+1])-1, '-12-31')
 
   translated_codes <- translate_knr(kommuneinndelinger_split[[ii]]$code,
-                      from_date = rep(start_date, n_municip),
-                      to_date = rep(end_date, n_municip))
+                      # from_date = rep(start_date, n_municip),
+                      # to_date = rep(end_date, n_municip))
+                      from_date = start_date,
+                      to_date = end_date)
 
   # Check that no change has happened
   no_change[ii] <- all(translated_codes == kommuneinndelinger_split[[ii]]$code)
@@ -238,8 +240,10 @@ for (ii in 1:(length(years)-1)){
   end_date <- paste0(years[ii+1], '-01-01')
 
   translated_codes <- translate_knr(kommuneinndelinger_split[[ii]]$code,
-                                    from_date = rep(start_date, n_municip),
-                                    to_date = rep(end_date, n_municip),
+                                    #from_date = rep(start_date, n_municip),
+                                    #to_date = rep(end_date, n_municip),
+                                    from_date = start_date,
+                                    to_date = end_date,
                                     show_warnings = FALSE)
 
   # Look only at unique codes, as merged municipalities will be present several times.
