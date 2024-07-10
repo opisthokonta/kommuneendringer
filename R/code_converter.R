@@ -183,11 +183,25 @@ translate_knr <- function(knr, from_date, to_date, show_warnings = TRUE){
   }
 
 
+  # Make id string for each input element.
+  id_string <- apply(cbind(knr, from_date, to_date), MARGIN = 1, FUN = function(x){paste0(x, collapse= '')})
+
+  # Check for duplicates
+  res_idx <- match(id_string, id_string)
+
+
   n_knr <- length(knr)
 
   res <- numeric(n_knr)
 
   for (ii in 1:n_knr){
+
+    # Check if result already computed
+    if (ii > res_idx[ii]){
+      res[ii] <- res[res_idx[ii]]
+      next
+    }
+
     res[ii] <- translate_knr_internal(knr = knr[ii], from_date = from_date[ii], to_date = to_date[ii], show_warnings = show_warnings)
   }
 

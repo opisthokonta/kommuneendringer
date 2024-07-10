@@ -188,6 +188,35 @@ test_that("Egersund", {
 })
 
 
+# Dupliacted input ----
+
+nrep <- 4
+
+test_that("Duplicted", {
+
+  # Use Halden as example.
+  expect_true(all(translate_knr(knr = rep('0101', nrep), from_date = '1977-05-17', to_date = '1978-02-11') == rep('0101', nrep)))
+  expect_true(all(translate_knr(knr = '0101', from_date = '1977-05-17', to_date = '2019-12-11') == '0101'))
+
+  expect_true(all(translate_knr(knr = rep('0101', nrep), from_date = '2019-05-17', to_date = '2020-02-11') == rep('3001', nrep)))
+  expect_true(all(translate_knr(knr = rep('0101', nrep), from_date = '2019-05-17', to_date = '2024-02-11') == rep('3101', nrep)))
+  expect_true(all(translate_knr(knr = rep('3001', nrep), from_date = '2020-05-17', to_date = '2024-02-11') == rep('3101', nrep)))
+
+
+  # Sogne + Halden
+  expect_true(all(translate_knr(knr = c(rep('0101', nrep), rep('1018', nrep)), from_date = '1977-05-17', to_date = '2020-02-11') == c(rep('3001', nrep), rep('4204', nrep))))
+
+  # Kristiansand backwards in time, should give NA
+  krs_backwards <- translate_knr(knr = rep('4204', nrep), from_date = '2020-05-17', to_date = '2019-02-11', show_warnings = FALSE)
+
+  expect_true(all(is.na(krs_backwards)))
+  expect_true(length(krs_backwards) == nrep)
+
+
+})
+
+
+
 # Check changes against kommuneinndelinger ----
 
 
