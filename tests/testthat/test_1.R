@@ -88,6 +88,10 @@ test_that("Stavanger", {
 
   expect_true(translate_knr(knr = '1103', from_date = '2000-05-17', to_date = '2021-02-11') == '1103')
 
+  # Should not be able to translate backwards in time
+  expect_true(is.na(translate_knr(knr = '1103', from_date = '2020-05-17', to_date = '2019-02-11', show_warnings = FALSE)))
+
+
 })
 
 
@@ -100,6 +104,9 @@ test_that("Bodo", {
   expect_true(translate_knr(knr = '1804', from_date = '2000-05-17', to_date = '2005-02-11') == '1804')
   expect_true(translate_knr(knr = '1842', from_date = '2000-05-17', to_date = '2005-02-11') == '1804')
   expect_true(translate_knr(knr = '1842', from_date = '2000-05-17', to_date = '2004-02-11') == '1842')
+
+  # Should not be able to translate backwards in time
+  expect_true(is.na(translate_knr(knr = '1804', from_date = '2005-05-17', to_date = '2004-02-11', show_warnings = FALSE)))
 
 })
 
@@ -188,7 +195,21 @@ test_that("Egersund", {
 })
 
 
-# Dupliacted input ----
+# Trondheim merged with 5030 Kleabu in 2020, but Trondheim did not change code (5001).
+
+test_that("Trondheim", {
+
+  expect_true(translate_knr(knr = '5001', from_date = '2019-01-01', to_date = '2020-05-01') == '5001')
+  expect_true(translate_knr(knr = '5030', from_date = '2019-01-01', to_date = '2020-05-01') == '5001')
+
+  # Should not be able to translate back in time.
+  expect_true(is.na(translate_knr(knr = '5001', from_date = '2020-05-01', to_date = '2019-05-01', show_warnings = FALSE)))
+
+})
+
+
+
+# Duplicated input ----
 
 nrep <- 4
 
@@ -218,7 +239,6 @@ test_that("Duplicted", {
 
 
 # Check changes against kommuneinndelinger ----
-
 
 years <- unique(kommuneinndelinger$year)
 
