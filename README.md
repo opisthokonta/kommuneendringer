@@ -57,8 +57,10 @@ library(kommuneendringer)
 
 A simple example is the municipality Halden. It hasn’t merged with any
 other municipality recently, but changed county, and therefore its code,
-in 2020 (from Østfold to Viken) and back to Østfold again in 2024, when
-Viken was split, getting yet a new code.
+in 2020 (from Østfold to Viken). The code was changed again in 2024,
+when Viken was split and the county of Østfold was re-established. The
+new Østfold county got a new county number and Halden’s new code was
+therefore not the same as before 2020.
 
 ``` r
 # Change code from 0101 to 3001 on January 1st 2020.
@@ -248,3 +250,20 @@ the name of the county is added in parenthesis to distinguish them.
   with another municipality in 2020 and got a new name.
 
 Samisnke navn på karasjon og nesseby, dato..
+
+## Links
+
+The data is sourced from Statistics Norway (Statistisk Sentralbyrå,
+SSB). Here are some relevant links.
+
+- [Alle endringer i de regionale
+  inndelingene](https://www.ssb.no/metadata/alle-endringer-i-de-regionale-inndelingene)
+  (in Norwegian)
+- [Classification of
+  municipalities](https://www.ssb.no/en/klass/klassifikasjoner/131/)
+
+Wikipedia has a relevant article:
+
+- [Wikipedia:Norske
+  kommunenummer](https://no.wikipedia.org/wiki/Norske_kommunenummer) (in
+  Norwegian)
