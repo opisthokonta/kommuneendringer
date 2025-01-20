@@ -97,14 +97,14 @@ translate_knr('1850', from_date = '2019-01-01', to_date = '2020-05-17')
 
 ## How it works
 
-Data from SSB. The graph model.
-
-
-New node when:
+This pacakge is based on data from Statistics Norway (SSB). From this data a directed graph (or network) is created, where a municipality is represented by a node. When the name or code of the municipality change, the municipality is represented by a new node, and there is a directed edge pointing from the old municipality to the new. New nodes are created when:
 
 * Code change
 * Name change (including when the municipality get official sami and kven names)
 * Merger, even when the new municipality keep name and code from predecessors.
+
+
+When mergers occur, two (or more) nodes representing the old municipalities have edges pointing to the new merged municipality. Each node have attributes that marks the start date and end date of the municipality. This way the history of a municipality can be followed and the correct successor municipalities can be found after mergers.
 
 
 
@@ -144,7 +144,14 @@ Usually, when there are changes in the municipal structure, it is because two or
 * In 2020, the municipality 1850 Tysfjord was split in two. One part merged with 1805 Narvik to become 1806 Narvik, and the other part merged with 1849 Hammarøy to become 1875 Hammarøy.
 *  In 2020, the municipality 5012 Snillfjord was split in 3. One part was merged with 3 other muncipalities to become 5059 Orkland. The second part was merged with two other municipalities to become 5055 Heim. The third part was merged with 5013 Hitra to become 5056 Hitra.
 * In 2020, the municipalities 1504 Ålesund and 1534 Haram merged to become 1507 Ålesund. In 2024 they reversed the merger, and split into 1508 Ålesund and 1580 Haram.
+* In 2017, the municipality 0720 Stokke was merged with 0706 Sandefjord (together with some other municipalities) to become 0710 Sandefjord, but part of it was merged with 0704 Tønsberg. Hence it is considered a split.
+* In 1992, part of 0412  Ringsaker was given to 0403 Hamar, and this is considered a split. 
 
+Splits not taken account of in data:
+* In 2002, 1514 Sande gave part to 1511 Vanylven, no change in code or names occured.
+* In 1992, small part of 0114 Varteig was given to Rakkestad, but the main part of the municiaplity was merged with Sandefjord.
+
+There might be other smaller border adjustments that are not in the data.
 
 
 #### Municipalities that share names
@@ -158,7 +165,14 @@ There are some municipalities that share the same name. Conventionally the name 
 * Sande (Vestfold) and Sande (Møre og Romsdal). Sande in Vestfold merged with another municipality in 2020 and got a new name.
 
 
-Samisnke navn på karasjon og nesseby, dato..
+
+Samiske navn på karasjok og nesseby, dato..
+
+## Version history
+
+* 0.1.2 (January 2025) - Updated data from SSB (data was updated in September 2024). Results will sometimes be different from what they were in version 0.1.1, since some historical municipality mergers/splits/changes have been added to the data.
+* 0.1.1 - Faster code conversion. The function now re-uses results when input is duplicated, instead of traversing the graph multiple times.
+* 0.1.0 (July 2024) - Initial version.
 
 
 ## Links
