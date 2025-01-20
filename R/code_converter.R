@@ -41,15 +41,14 @@ check_node <- function(graph_obj, node_id, date){
 # Internal function that actually does the translation. Only one at a time
 translate_knr_internal <- function(knr, from_date, to_date, show_warnings = TRUE){
 
-
   start_node <- DiagrammeR::get_node_ids(kommunegraph, conditions = code == knr & end_date >= from_date & start_date <= from_date)
+
+  stopifnot(length(start_node) == 1)
+
 
   if (is.na(start_node)){
     return(NA)
   }
-
-  stopifnot(length(start_node) == 1)
-
 
   if (from_date == to_date){
     return(knr)
