@@ -209,6 +209,77 @@ test_that("Trondheim", {
 
 
 
+test_that("Ringsaker", {
+
+  expect_true(is.na(translate_knr(knr = '0412', from_date = '1990-01-01', to_date = '1995-05-01', show_warnings = FALSE))) # NA because of split.
+  expect_true(translate_knr(knr = '0412', from_date = '1990-01-01', to_date = '1991-05-01') == '0412') # no change here.
+
+})
+
+test_that("Hamar", {
+
+  # Hamar before and after the merger with Vang + part of Ringsaker.
+  expect_true(translate_knr(knr = '0401', from_date = '1991-01-01', to_date = '1992-05-01') == '0403')
+
+  # Vang -> Hamar merger.
+  expect_true(translate_knr(knr = '0414', from_date = '1991-01-01', to_date = '1992-05-01') == '0403')
+
+})
+
+
+test_that("Stokke", {
+
+  expect_true(is.na(translate_knr(knr = '0720', from_date = '2016-01-01', to_date = '2017-05-01', show_warnings = FALSE)))
+
+})
+
+
+test_that("Sandefjord", {
+
+  expect_true(translate_knr(knr = '0706', from_date = '2016-01-01', to_date = '2017-05-01') == '0710')
+
+  # Andebu -> Sandefjord merger
+  expect_true(translate_knr(knr = '0719', from_date = '2016-01-01', to_date = '2017-05-01') == '0710')
+
+})
+
+
+test_that("Sande", {
+
+  expect_true(translate_knr(knr = '1514', from_date = '2001-01-01', to_date = '2002-05-01') == '1514')
+  expect_true(translate_knr(knr = '1514', from_date = '2000-01-01', to_date = '2001-05-01') == '1514')
+
+})
+
+
+test_that("Vanylven", {
+
+  expect_true(translate_knr(knr = '1511', from_date = '2001-01-01', to_date = '2002-05-01') == '1511')
+  expect_true(translate_knr(knr = '1511', from_date = '2000-01-01', to_date = '2001-05-01') == '1511')
+
+})
+
+
+test_that("Varteig", {
+
+  #expect_true(is.na(translate_knr(knr = '0114', from_date = '1991-01-01', to_date = '1992-05-01', show_warnings = FALSE)))
+  expect_true(translate_knr(knr = '0114', from_date = '1991-01-01', to_date = '1992-05-01') == '0105')
+  expect_true(translate_knr(knr = '0114', from_date = '1990-01-01', to_date = '1990-05-01') == '0114')
+
+})
+
+
+
+test_that("Rakkestad", {
+
+  expect_true(translate_knr(knr = '0128', from_date = '1990-01-01', to_date = '1990-05-01') == '0128')
+  expect_true(translate_knr(knr = '0128', from_date = '1991-01-01', to_date = '1992-05-01') == '0128')
+  expect_true(translate_knr(knr = '0128', from_date = '1992-01-01', to_date = '1993-05-01') == '0128')
+
+})
+
+
+
 # Duplicated input ----
 
 nrep <- 4
@@ -272,10 +343,7 @@ test_that("No change within version", {
 })
 
 
-
-
 # Check changes between versions.
-
 
 translated_codes_in_next <- logical(length(years)-1)
 codes_in_translated <- logical(length(years)-1)
@@ -302,18 +370,40 @@ for (ii in 1:(length(years)-1)){
   translated_codes_unique_na_omit <- na.omit(unique(translated_codes))
 
 
-
-  # NA omit in 2019 & 2023, since the splits occured in 2020 and 2024.
-  if (years[ii] %in% c('2019', '2023')){
+  # NA omit in 2019 & 2023, since the splits occurred in 2020 and 2024.
+  if (years[ii] %in% c('1991', '2015', '2019', '2023')){
 
     # Check that all translated codes are in the new kommuneinndeling
     translated_codes_in_next[ii] <- all(translated_codes_unique_na_omit %in% kommuneinndelinger_split[[ii+1]]$code)
 
     # Check that all codes in the new kommuneinndeling are in the translated codes
 
-    if (years[ii] == '2023'){
+    if (years[ii] == '1991'){
 
-      # This is not needed for 2019, because the sucessor municipalities of the split are represented
+      codes_to_not_check <- c('0412') # Do not check 0412 Ringsaker, as it was split.
+      codes_to_check <- kommuneinndelinger_split[[ii+1]]$code
+      codes_to_check <- codes_to_check[!codes_to_check %in% codes_to_not_check]
+
+      codes_in_translated[ii] <- all((codes_to_check %in% translated_codes_unique_na_omit))
+
+      # Should be of equal length, with na omit, in this case.
+      translation_length_ok[ii] <- length(translated_codes_unique_na_omit) != nrow(kommuneinndelinger_split[[ii+1]])
+
+
+    } else if (years[ii] == '2015'){
+
+      codes_to_not_check <- c('0720') # Do not check 0720 Stokke, as it was split.
+      codes_to_check <- kommuneinndelinger_split[[ii+1]]$code
+      codes_to_check <- codes_to_check[!codes_to_check %in% codes_to_not_check]
+
+      codes_in_translated[ii] <- all((codes_to_check %in% translated_codes_unique_na_omit))
+
+      # Should NOT be of equal length, when splits occur.
+      translation_length_ok[ii] <- length(translated_codes_unique) != nrow(kommuneinndelinger_split[[ii+1]])
+
+    } else if (years[ii] == '2023'){
+
+      # This is not needed for 2019, because the successor municipalities of the split are represented
       # because they are merged with other municipalities.
 
       codes_to_not_check <- c('1508', '1580') # Do not check the new split Aalesund & Haram
@@ -322,12 +412,17 @@ for (ii in 1:(length(years)-1)){
 
       codes_in_translated[ii] <- all((codes_to_check %in% translated_codes_unique_na_omit))
 
+      # Should NOT be of equal length, when splits occur.
+      translation_length_ok[ii] <- length(translated_codes_unique) != nrow(kommuneinndelinger_split[[ii+1]])
+
     } else {
       codes_in_translated[ii] <- all((kommuneinndelinger_split[[ii+1]]$code %in% translated_codes_unique_na_omit))
+
+
+      # Should NOT be of equal length, when splits occur.
+      translation_length_ok[ii] <- length(translated_codes_unique) != nrow(kommuneinndelinger_split[[ii+1]])
     }
 
-    # Should NOT be of equal length, when splits occur.
-    translation_length_ok[ii] <- length(translated_codes_unique) != nrow(kommuneinndelinger_split[[ii+1]])
 
   } else {
 
@@ -340,7 +435,6 @@ for (ii in 1:(length(years)-1)){
     translation_length_ok[ii] <- length(translated_codes_unique) == nrow(kommuneinndelinger_split[[ii+1]])
   }
 
-
 }
 
 
@@ -351,9 +445,6 @@ test_that("Expected changes between versions", {
   expect_true(all(codes_in_translated))
   expect_true(all(translation_length_ok))
 })
-
-
-
 
 
 
