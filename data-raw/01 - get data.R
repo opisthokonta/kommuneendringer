@@ -15,13 +15,13 @@ download.file('https://data.ssb.no/api/klass/v1/classifications/131.json',
 kommuneinndelinger_versjoner <- fromJSON('131.json')$version
 
 
-kommuneinndelinger_versjoner %>% 
+kommuneinndelinger_versjoner %>%
   mutate(validFrom = ymd(validFrom),
          validTo = ymd(validTo)) -> kommuneinndelinger_versjoner
 
 
 # Get links to versions to download.
-kommuneinndelinger_versjoner %>% 
+kommuneinndelinger_versjoner %>%
   filter(validFrom >= '1977-01-01') -> kommuneinndelinger_versjoner_filtered
 
 
@@ -31,11 +31,11 @@ kommuneinndelinger_versjoner_filtered$json_links <- paste0(kommuneinndelinger_ve
 
 # Download Kommuneinndelinger.
 for (ii in 1:nrow(kommuneinndelinger_versjoner_filtered)){
-  
+
   if (ii > 1){
     Sys.sleep(2.5)
   }
-  
+
   fname <- paste0(kommuneinndelinger_versjoner_filtered$name[ii], '.json')
   download.file(kommuneinndelinger_versjoner_filtered$json_links[ii], destfile = fname, mode = 'wb')
 }
@@ -44,7 +44,7 @@ for (ii in 1:nrow(kommuneinndelinger_versjoner_filtered)){
 
 # Get change tables
 
-download.file('https://data.ssb.no/api/klass/v1/classifications/131/changes.json?from=1977-01-01&to=2024-01-02', 
+download.file('https://data.ssb.no/api/klass/v1/classifications/131/changes.json?from=1977-01-01&to=2025-01-02',
               destfile = 'changetables.json', mode = 'wb')
 
 
