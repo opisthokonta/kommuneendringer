@@ -35,8 +35,8 @@ This can translate the four-digit municipal code between different time
 point starting from January 1st 1977. It is updated with all changes up
 until January 1st 2024.
 
-It currently only supports translating municipality codes. I will soon
-add functionality for translating county codes as well.
+It currently only supports translating municipality codes. I will add
+functionality for translating county codes at some point in the future.
 
 Special municipal codes such as those for Svalbard, off-shore
 installations , etc, are not supported.
@@ -99,8 +99,8 @@ translate_knr('3101', from_date = '2024-01-01', to_date = '2015-05-17')
 An example of municipalities that merged are Søgne, Songdalen and
 Kristiansand, which merged in 2020. When municipalities merge, the
 `translate_knr` function will, if possible, give you the code for the
-merged municipality. You can then perhaps aggregate data from the
-historical municipalities as if they are the new municipality.
+merged municipality. You can then perhaps use this to aggregate data
+from the historical municipalities as if they are the new municipality.
 
 ``` r
 # Søgne's code was 1018.
@@ -276,6 +276,10 @@ Samiske navn på karasjok og nesseby, dato..
 
 ## Version history
 
+- 0.1.3 (March 2025) - Some changes to in the underlying code to build
+  the graph object from SSB data. This should make it easier to update
+  the pacakge with more historical data and new changes in the future.
+  Should be no changes for the user.
 - 0.1.2 (January 2025) - Updated data from SSB (data was updated in
   September 2024). Results will sometimes be different from what they
   were in version 0.1.1, since some historical municipality
