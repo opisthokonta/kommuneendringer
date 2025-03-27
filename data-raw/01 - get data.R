@@ -22,7 +22,7 @@ kommuneinndelinger_versjoner %>%
 
 # Get links to versions to download.
 kommuneinndelinger_versjoner %>%
-  filter(validFrom >= '1977-01-01') -> kommuneinndelinger_versjoner_filtered
+  filter(validFrom >= '1971-01-01') -> kommuneinndelinger_versjoner_filtered
 
 
 # The href column is nested within some other columns.
@@ -44,7 +44,7 @@ for (ii in 1:nrow(kommuneinndelinger_versjoner_filtered)){
 
 # Get change tables
 
-download.file('https://data.ssb.no/api/klass/v1/classifications/131/changes.json?from=1977-01-01&to=2025-01-02',
+download.file('https://data.ssb.no/api/klass/v1/classifications/131/changes.json?from=1971-01-01&to=2025-01-02',
               destfile = 'changetables.json', mode = 'wb')
 
 

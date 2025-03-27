@@ -271,13 +271,89 @@ test_that("Varteig", {
 
 
 test_that("Rakkestad", {
-
+  expect_true(translate_knr(knr = '0128', from_date = '1971-01-01', to_date = '1990-05-01') == '0128')
   expect_true(translate_knr(knr = '0128', from_date = '1990-01-01', to_date = '1990-05-01') == '0128')
   expect_true(translate_knr(knr = '0128', from_date = '1991-01-01', to_date = '1992-05-01') == '0128')
   expect_true(translate_knr(knr = '0128', from_date = '1992-01-01', to_date = '1993-05-01') == '0128')
 
 })
 
+
+
+# Tolga-Os split in 1976.
+test_that("Tolga-Os", {
+  expect_true(is.na(translate_knr(knr = '0435', from_date = '1975-01-01', to_date = '1976-05-17', show_warnings = FALSE)))
+
+  # Backwards in time
+  expect_true(translate_knr(knr = '0436', from_date = '1976-01-01', to_date = '1975-05-17', show_warnings = FALSE) == '0435')
+  expect_true(translate_knr(knr = '0441', from_date = '1976-01-01', to_date = '1975-05-17', show_warnings = FALSE) == '0435')
+
+
+})
+
+# Moskenes split in 1976.
+test_that("Moskenes", {
+  expect_true(is.na(translate_knr(knr = '1858', from_date = '1975-01-01', to_date = '1976-05-17', show_warnings = FALSE)))
+
+  # backwards in time
+  expect_true(translate_knr(knr = '1859', from_date = '1976-01-01', to_date = '1975-05-17', show_warnings = FALSE) == '1858')
+  expect_true(translate_knr(knr = '1874', from_date = '1976-01-01', to_date = '1975-05-17', show_warnings = FALSE) == '1858')
+
+})
+
+
+# Fron split in 1977.
+test_that("Fron", {
+  expect_true(is.na(translate_knr(knr = '1518', from_date = '1976-01-01', to_date = '1977-05-17', show_warnings = FALSE)))
+})
+
+# Ringerike split in 1977.
+test_that("Ringerike", {
+  expect_true(is.na(translate_knr(knr = '0601', from_date = '1976-01-01', to_date = '1977-05-17', show_warnings = FALSE)))
+})
+
+# 1230 Ullensvang	 split in 1977.
+test_that("Ullensvang", {
+  expect_true(is.na(translate_knr(knr = '1230', from_date = '1976-01-01', to_date = '1977-05-17', show_warnings = FALSE)))
+})
+
+
+# 1448 Stryn split in 1977.
+test_that("Stryn", {
+  expect_true(is.na(translate_knr(knr = '1448', from_date = '1976-01-01', to_date = '1977-05-17', show_warnings = FALSE)))
+})
+
+# Ålesund split in 1977, and in 2024
+test_that("Ålesund", {
+  # The 1977 split
+  expect_true(is.na(translate_knr(knr = '1501', from_date = '1976-01-01', to_date = '1977-05-17', show_warnings = FALSE)))
+
+  # the 2024 split
+  expect_true(is.na(translate_knr(knr = '1507', from_date = '2023-01-01', to_date = '2024-05-17', show_warnings = FALSE)))
+
+  # the 2020 merger
+  expect_true(translate_knr(knr = '1504', from_date = '2018-01-01', to_date = '2020-05-17') == '1507')
+  expect_true(translate_knr(knr = '1523', from_date = '2018-01-01', to_date = '2020-05-17') == '1507')
+  expect_true(translate_knr(knr = '1529', from_date = '2018-01-01', to_date = '2020-05-17') == '1507')
+  expect_true(translate_knr(knr = '1534', from_date = '2018-01-01', to_date = '2020-05-17') == '1507')
+  expect_true(translate_knr(knr = '1546', from_date = '2018-01-01', to_date = '2020-05-17') == '1507')
+
+})
+
+# 1527 Ørskog split in 1977.
+test_that("Ørskog", {
+  expect_true(is.na(translate_knr(knr = '1527', from_date = '1976-01-01', to_date = '1977-05-17', show_warnings = FALSE)))
+})
+
+# 1814 Brønnøy split in 1977.
+test_that("Brønnøy", {
+  expect_true(is.na(translate_knr(knr = '1814', from_date = '1976-01-01', to_date = '1977-05-17', show_warnings = FALSE)))
+})
+
+# 1921 Salangen split in 1977.
+test_that("Salangen", {
+  expect_true(is.na(translate_knr(knr = '1921', from_date = '1976-01-01', to_date = '1977-05-17', show_warnings = FALSE)))
+})
 
 
 # Duplicated input ----
@@ -304,9 +380,7 @@ test_that("Duplicted", {
   expect_true(all(is.na(krs_backwards)))
   expect_true(length(krs_backwards) == nrep)
 
-
 })
-
 
 
 # Check changes against kommuneinndelinger ----
@@ -343,6 +417,9 @@ test_that("No change within version", {
 })
 
 
+
+
+
 # Check changes between versions.
 
 translated_codes_in_next <- logical(length(years)-1)
@@ -357,8 +434,6 @@ for (ii in 1:(length(years)-1)){
   end_date <- paste0(years[ii+1], '-01-01')
 
   translated_codes <- translate_knr(kommuneinndelinger_split[[ii]]$code,
-                                    #from_date = rep(start_date, n_municip),
-                                    #to_date = rep(end_date, n_municip),
                                     from_date = start_date,
                                     to_date = end_date,
                                     show_warnings = FALSE)
@@ -366,19 +441,55 @@ for (ii in 1:(length(years)-1)){
   # Look only at unique codes, as merged municipalities will be present several times.
   translated_codes_unique <- unique(translated_codes)
 
-  # Na omit since split municipalities returns NA. Should not occur before 2020.
+  # Na omit since split municipalities returns NA.
   translated_codes_unique_na_omit <- na.omit(unique(translated_codes))
 
 
   # NA omit in 2019 & 2023, since the splits occurred in 2020 and 2024.
-  if (years[ii] %in% c('1991', '2015', '2019', '2023')){
+  if (years[ii] %in% c('1974', '1976' ,'1991', '2015', '2019', '2023')){
 
     # Check that all translated codes are in the new kommuneinndeling
     translated_codes_in_next[ii] <- all(translated_codes_unique_na_omit %in% kommuneinndelinger_split[[ii+1]]$code)
 
     # Check that all codes in the new kommuneinndeling are in the translated codes
 
-    if (years[ii] == '1991'){
+    if (years[ii] == '1974'){
+
+      # Do not check 0435 Tolga-Os -> 0436, 0441, as it was split.
+      # Do not check 1858 Moskenes -> 1859, 1874, as it was split.
+      codes_to_not_check <- c('0436', '0441', '1859', '1874')
+
+      codes_to_check <- kommuneinndelinger_split[[ii+1]]$code
+      codes_to_check <- codes_to_check[!codes_to_check %in% codes_to_not_check]
+
+      codes_in_translated[ii] <- all((codes_to_check %in% translated_codes_unique_na_omit))
+
+      # Should be of equal length, with na omit, in this case.
+      translation_length_ok[ii] <- length(translated_codes_unique_na_omit) != nrow(kommuneinndelinger_split[[ii+1]])
+
+    } else if (years[ii] == '1976'){
+
+      # Many splits in this version
+      codes_to_not_check <- c('0516', '0519', # 0518 Fron
+                              '0605', '0612', # 0601 Ringerike
+                              '1231', '1232', # 1230 Ullensvang
+                              '1444', '1449', # 1448 Stryn
+                              '1504', '1531', # 1501 Ålesund
+                              '1523', '1526', '1529', # 1527 Ørskog
+                              '1812', '1813', # 1814 Brønnøy
+                              '1920', '1923' # 1921 Salangen
+                              )
+
+      codes_to_check <- kommuneinndelinger_split[[ii+1]]$code
+      codes_to_check <- codes_to_check[!codes_to_check %in% codes_to_not_check]
+
+      codes_in_translated[ii] <- all((codes_to_check %in% translated_codes_unique_na_omit))
+
+      # Should be of equal length, with na omit, in this case.
+      translation_length_ok[ii] <- length(translated_codes_unique_na_omit) != nrow(kommuneinndelinger_split[[ii+1]])
+
+
+    }else if (years[ii] == '1991'){
 
       codes_to_not_check <- c('0412') # Do not check 0412 Ringsaker, as it was split.
       codes_to_check <- kommuneinndelinger_split[[ii+1]]$code
@@ -388,7 +499,6 @@ for (ii in 1:(length(years)-1)){
 
       # Should be of equal length, with na omit, in this case.
       translation_length_ok[ii] <- length(translated_codes_unique_na_omit) != nrow(kommuneinndelinger_split[[ii+1]])
-
 
     } else if (years[ii] == '2015'){
 
@@ -448,7 +558,9 @@ test_that("Expected changes between versions", {
 
 
 
-#
+
+
+
 # # Should give errors
 # translate_knr(knr = 'asd', from_date = '2017-05-17', to_date = '2018-02-11')
 #

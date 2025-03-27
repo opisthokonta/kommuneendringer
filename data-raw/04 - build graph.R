@@ -1,5 +1,4 @@
 
-# New version of build graph: Try to iteratively apply the changetables to initial list of municipalities.
 
 library(fs)
 library(dplyr)
@@ -39,8 +38,8 @@ stopifnot(all(all_codes_changes %in% all_codes))
 # Initialize nodes
 
 kommuneinndelinger %>%
-  filter(year == 1977) %>%
-  mutate(start_date = ymd('1977-01-01'),
+  filter(year == 1971) %>%
+  mutate(start_date = ymd('1971-01-01'),
          end_date = as.Date(FINAL_DATE)) %>%
   select(-year) %>%
   mutate(NODE = 1:n()) -> nodes_init
@@ -148,7 +147,7 @@ changetable_filtered %>%
 # Do some checks.
 # Merge the edges with the node list, then check the names.
 
-# Checks the new nodes (after 1977)
+# Checks the new nodes (after 1971)
 all_nodes %>%
   left_join(changetable_with_nodes, by = c('NODE' = 'NODE_TO')) %>%
   mutate(NAME_OK = full_name == newName,

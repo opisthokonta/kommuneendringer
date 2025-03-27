@@ -1,13 +1,18 @@
 
 
-library(dplyr)
-library(fs)
-library(DiagrammeR)
+# library(dplyr)
+# library(fs)
+# library(DiagrammeR)
 
 
 # kommunegraph <- readRDS(file = path('C:', 'Users', 'JCLI', 'OneDrive - Folkehelseinstituttet', 'ssb kommune', 'data', 'kommunegraph.RDS'))
 
 #kommunegraph %>% get_node_df() %>% View()
+
+
+FIRST_DATE <- as.Date('1971-01-01')
+FINAL_DATE <- as.Date('2035-12-31')
+
 
 is_date <- function(x){
   'Date' %in% class(x)
@@ -173,12 +178,12 @@ translate_knr <- function(knr, from_date, to_date, show_warnings = TRUE){
   }
 
   # Check the date ranges
-  if (any(from_date < as.Date('1977-01-01')) | any(from_date > as.Date('2034-01-01'))){
-    stop(sprintf('argument from_date out of range: %s. Must be between 1977-01-01 and 2034-01-01', from_date))
+  if (any(from_date < FIRST_DATE) | any(from_date > FINAL_DATE)){
+    stop(sprintf('argument from_date out of range: %s. Must be between %s and %s', from_date, FIRST_DATE, FINAL_DATE))
   }
 
-  if (any(to_date < as.Date('1977-01-01')) | any(to_date > as.Date('2034-01-01'))){
-    stop(sprintf('argument to_date out of range: %s. Must be between 1977-01-01 and 2034-01-01', to_date))
+  if (any(to_date < FIRST_DATE) | any(to_date > FINAL_DATE)){
+    stop(sprintf('argument to_date out of range: %s. Must be between %s and %s', to_date, FIRST_DATE, FINAL_DATE))
   }
 
 
