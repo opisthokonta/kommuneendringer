@@ -21,7 +21,7 @@ devtools::install_github("opisthokonta/kommuneendringer")
 
 ## Features and limitatons
 
-The main functionality of this package is the `translate_knr` function. This can translate the four-digit municipal code between different time point starting from January 1st 1977. It is updated with all changes up until January 1st 2024.
+The main functionality of this package is the `translate_knr` function. This can translate the four-digit municipal code between different time point starting from January 1st 1971. It is updated with all changes up until January 1st 2024.
 
 It currently only supports translating municipality codes. I will add functionality for translating county codes at some point in the future. 
 
