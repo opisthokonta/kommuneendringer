@@ -232,7 +232,8 @@ all_nodes_counties %>%
 changetable_with_nodes %>%
   rename(from = NODE_FROM,
          to = NODE_TO) %>%
-  select(from, to, EDGE, changeOccurred) -> dta_edges
+  select(from, to, EDGE, changeOccurred) %>%
+  mutate(edge_type = 1) -> dta_edges
 
 head(dta_edges)
 
@@ -245,6 +246,20 @@ head(dta_nodes)
 
 # Small check
 all(dta_edges$from %in% dta_nodes$id)
+
+
+# Add
+source('skilsmissekommuner.R')
+
+dta_edges2 <- skilsmissekommuner(dta_nodes)
+dta_edges2$changeOccurred <- as.Date(dta_edges2$changeOccurred)
+max_edge_num <- max(dta_edges$EDGE)
+
+dta_edges2$EDGE <- (max_edge_num + 1):(max_edge_num + nrow(dta_edges2))
+
+dta_edges <- bind_rows(dta_edges, dta_edges2)
+
+
 
 
 

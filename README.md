@@ -32,7 +32,7 @@ devtools::install_github("opisthokonta/kommuneendringer")
 
 The main functionality of this package is the `translate_knr` function.
 This can translate the four-digit municipal code between different time
-point starting from January 1st 1977. It is updated with all changes up
+point starting from January 1st 1971. It is updated with all changes up
 until January 1st 2024.
 
 It currently only supports translating municipality codes. I will add
@@ -159,9 +159,51 @@ translate_knr('1850', from_date = '2019-01-01', to_date = '2020-05-17')
 
     ## [1] NA
 
+### Example 4: Reversed mergers
+
+In 2020 five municipality merged to become the new municipality 1507
+Ålesund. In 2024, the new municipality was split in two, where one of
+the old municipalities was resurrected, effectively reversing the merger
+of this municipality. The resurrected municipality is 1580 Haram, which
+had the code 1534 before the 2020 merger.
+
+Normally a split like this would make translation impossible, but it is
+possible to translate the old, pre-merger, Haram code to the new,
+post-split, code. Set the allow_reversals argument to TRUE:
+
+``` r
+translate_knr('1534', from_date = '2018-01-01', to_date = '2025-05-17', allow_reversals = TRUE)
+```
+
+    ## [1] "1580"
+
+It also works for the other four municipalities that were merged in
+2020, in this example 1529 Skodje, which is part of 1508 Ålesund from
+2024:
+
+``` r
+translate_knr('1529', from_date = '2019-05-17', to_date = '2025-05-17', allow_reversals = TRUE)
+```
+
+    ## [1] "1508"
+
+But notice that it only works for translations that goes from before to
+after the split. A translation from the merged municipality 1507 to some
+time after the 2024 split does not work:
+
+``` r
+translate_knr('1507', from_date = '2020-01-01', to_date = '2025-05-17', allow_reversals = TRUE)
+```
+
+    ## Warning in translate_knr_internal(knr = knr[ii], from_date = from_date[ii], :
+    ## knr 1507 no unambigious code translation possible from 2020-01-01 to
+    ## 2025-05-17.
+
+    ## [1] NA
+
 ## How it works
 
-This pacakge is based on data from Statistics Norway (SSB). From this
+This package is based on data from Statistics Norway (SSB). From this
 data a directed graph (or network) is created, where a municipality is
 represented by a node. When the name or code of the municipality change,
 the municipality is represented by a new node, and there is a directed
@@ -244,6 +286,8 @@ this, when sometimes municipalities split:
   split.
 - In 1992, part of 0412 Ringsaker was given to 0403 Hamar, and this is
   considered a split.
+- In 1976, 0435 Tolga-Os split into 0436 Tolga and 0441 Os (Hedmark),
+  and 1858 Moskenes split into 1859 Flakstad and 1874 Moskenes.
 
 Splits not taken account of in data: \* In 2002, 1514 Sande gave part to
 1511 Vanylven, no change in code or names occured. \* In 1992, small

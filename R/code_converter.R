@@ -1,14 +1,9 @@
 
 
-# library(dplyr)
-# library(fs)
-# library(DiagrammeR)
-
-
-# kommunegraph <- readRDS(file = path('C:', 'Users', 'JCLI', 'OneDrive - Folkehelseinstituttet', 'ssb kommune', 'data', 'kommunegraph.RDS'))
-
-#kommunegraph %>% get_node_df() %>% View()
-
+library(dplyr)
+library(fs)
+library(DiagrammeR)
+#
 
 FIRST_DATE <- as.Date('1971-01-01')
 FINAL_DATE <- as.Date('2035-12-31')
@@ -39,12 +34,50 @@ check_node <- function(graph_obj, node_id, date){
 }
 
 
+get_successors_by_edge_type <- function(gr, node_id, edge_types){
+
+  edf <- DiagrammeR::get_edge_df(gr)
+  edf <- dplyr::filter(edf, from == node_id)
+  edf <- dplyr::filter(edf, edge_type %in% edge_types)
+  res <- dplyr::pull(edf, to)
+
+  if (length(res) == 0){
+    res <- NA
+  }
+
+  return(res)
+
+}
+
+
+get_predecessors_by_edge_type <- function(gr, node_id, edge_types){
+
+  # gr %>%
+  #   DiagrammeR::get_edge_df() %>%
+  #   dplyr::filter(to == node_id) %>%
+  #   dplyr::filter(edge_type %in% edge_types) %>%
+  #   dplyr::pull(from) -> res
+
+  edf <- DiagrammeR::get_edge_df(gr)
+  edf <- dplyr::filter(edf, to == node_id)
+  edf <- dplyr::filter(edf, edge_type %in% edge_types)
+  res <- dplyr::pull(edf, from)
+
+  if (length(res) == 0){
+    res <- NA
+  }
+
+  return(res)
+}
+
+
 
 
 
 
 # Internal function that actually does the translation. Only one at a time
-translate_knr_internal <- function(knr, from_date, to_date, show_warnings = TRUE){
+translate_knr_internal <- function(knr, from_date, to_date, allow_reversals = FALSE, show_warnings = TRUE){
+
 
   start_node <- DiagrammeR::get_node_ids(kommunegraph, conditions = code == knr & end_date >= from_date & start_date <= from_date)
 
@@ -83,32 +116,98 @@ translate_knr_internal <- function(knr, from_date, to_date, show_warnings = TRUE
   # Traverse the graph.
   while (traverse_graph){
 
-    if (forward){
-      current_node_id <- DiagrammeR::get_successors(kommunegraph, node = current_node_id)
-    } else {
-      current_node_id <- DiagrammeR::get_predecessors(kommunegraph, node = current_node_id)
-    }
 
-    # If there are multiple successors/predecessors, it means that:
-    # * the municipality was split into several municipalities (forward in time)
-    # * or merged (backward in time)
-    if (length(current_node_id) > 1){
+    if (allow_reversals){
 
-      if (show_warnings){
-        warning(sprintf('knr %s no unambigious code translation possible from %s to %s.', knr, from_date, to_date))
+      follow_edge_type_1 <- FALSE
+
+      if (forward){
+        next_node_id <- get_successors_by_edge_type(kommunegraph, node = current_node_id, edge_types = 2)
+      } else {
+        next_node_id <- get_predecessors_by_edge_type(kommunegraph, node = current_node_id, edge_types = 2)
       }
 
-      current_node_id <- NA
-      break
+
+      # Assume that it's always length 1.
+      stopifnot(length(next_node_id) <= 1)
+      #browser()
+
+      # Check if the node should be followed
+      if (is.na(next_node_id)){
+
+        follow_edge_type_1 <- TRUE
+
+      } else {
+
+        if (forward){
+
+          # kommunegraph %>%
+          #   get_node_df() %>%
+          #   filter(id == next_node_id) %>%
+          #   pull(start_date) -> sd_tmp
+
+          gndf <- DiagrammeR::get_node_df(kommunegraph)
+          gndf <- dplyr::filter(gndf, id == next_node_id)
+          sd_tmp <- dplyr::pull(gndf, start_date)
+
+          if(to_date < sd_tmp){
+            follow_edge_type_1 <- TRUE
+          }
+
+        } else {
+
+          # Backward
+          # kommunegraph %>%
+          #   get_node_df() %>%
+          #   filter(id == next_node_id) %>%
+          #   pull(end_date) -> ed_tmp
+
+          gndf <- DiagrammeR::get_node_df(kommunegraph)
+          gndf <- dplyr::filter(gndf, id == next_node_id)
+          ed_tmp <- pull(gndf, end_date)
+
+          if(to_date > ed_tmp){
+            follow_edge_type_1 <- TRUE
+          }
+
+        }
+
+      }
+    } else {
+      follow_edge_type_1 <- TRUE
     }
 
-    # next_node_id is NA if no sucessors.
-    if (is.na(current_node_id)){
-      break
+    if (follow_edge_type_1){
+
+      if (forward){
+        next_node_id <- get_successors_by_edge_type(kommunegraph, node = current_node_id, edge_types = 1)
+      } else {
+        next_node_id <- get_predecessors_by_edge_type(kommunegraph, node = current_node_id, edge_types = 1)
+      }
+
+      # If there are multiple successors/predecessors, it means that:
+      # * the municipality was split into several municipalities (forward in time)
+      # * or merged (backward in time)
+      if (length(next_node_id) > 1){
+
+        if (show_warnings){
+          warning(sprintf('knr %s no unambigious code translation possible from %s to %s.', knr, from_date, to_date))
+        }
+
+        current_node_id <- NA
+        break
+      }
+
+      # next_node_id is NA if no sucessors.
+      if (is.na(next_node_id)){
+        break
+      }
+
     }
 
+    node_found <- check_node(kommunegraph, node_id = next_node_id, date = to_date)
 
-    node_found <- check_node(kommunegraph, node_id = current_node_id, date = to_date)
+    current_node_id <- next_node_id
 
     if (node_found){
       break
@@ -136,6 +235,7 @@ translate_knr_internal <- function(knr, from_date, to_date, show_warnings = TRUE
 }
 
 
+
 #' Translate municipal numbers from one time point to another
 #'
 #'
@@ -147,7 +247,7 @@ translate_knr_internal <- function(knr, from_date, to_date, show_warnings = TRUE
 #' @returns A character vector with the municipal numbers used on to_date.
 #'
 #' @export
-translate_knr <- function(knr, from_date, to_date, show_warnings = TRUE){
+translate_knr <- function(knr, from_date, to_date, allow_reversals = FALSE, show_warnings = TRUE){
 
 
   # # All input must have same length
@@ -206,7 +306,7 @@ translate_knr <- function(knr, from_date, to_date, show_warnings = TRUE){
       next
     }
 
-    res[ii] <- translate_knr_internal(knr = knr[ii], from_date = from_date[ii], to_date = to_date[ii], show_warnings = show_warnings)
+    res[ii] <- translate_knr_internal(knr = knr[ii], from_date = from_date[ii], to_date = to_date[ii], allow_reversals = allow_reversals, show_warnings = show_warnings)
   }
 
   return(res)

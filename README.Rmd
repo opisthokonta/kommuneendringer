@@ -94,10 +94,35 @@ translate_knr('1850', from_date = '2019-01-01', to_date = '2020-05-17')
 ```
 
 
+### Example 4: Reversed mergers
+
+In 2020 five municipalities merged to become the new municipality 1507 Ålesund. In 2024, the new municipality was split in two, where one of the old municipalities was resurrected, effectively reversing the merger of this municipality. The resurrected municipality is 1580 Haram, which had the code 1534 before the 2020 merger. 
+
+Normally a split like this would make translation impossible, but it is possible to translate the old, pre-merger, Haram code to the new, post-split, code. Set the allow_reversals argument to TRUE:
+
+
+```{r}
+translate_knr('1534', from_date = '2018-01-01', to_date = '2025-05-17', allow_reversals = TRUE)
+```
+
+It also works for the other four municipalities that were merged in 2020, in this example 1529 Skodje, which is part of 1508 Ålesund from 2024:
+
+```{r}
+translate_knr('1529', from_date = '2019-05-17', to_date = '2025-05-17', allow_reversals = TRUE)
+```
+
+But notice that it only works for translations that goes from before to after the split. A translation from the merged municipality 1507 to some time after the 2024 split does not work:
+
+
+```{r}
+translate_knr('1507', from_date = '2020-01-01', to_date = '2025-05-17', allow_reversals = TRUE)
+```
+
+
 
 ## How it works
 
-This pacakge is based on data from Statistics Norway (SSB). From this data a directed graph (or network) is created, where a municipality is represented by a node. When the name or code of the municipality change, the municipality is represented by a new node, and there is a directed edge pointing from the old municipality to the new. New nodes are created when:
+This package is based on data from Statistics Norway (SSB). From this data a directed graph (or network) is created, where a municipality is represented by a node. When the name or code of the municipality change, the municipality is represented by a new node, and there is a directed edge pointing from the old municipality to the new. New nodes are created when:
 
 * Code change
 * Name change (including when the municipality get official sami and kven names)
@@ -172,6 +197,7 @@ There are some municipalities that share the same name. Conventionally the name 
 Samiske navn på karasjok og nesseby, dato..
 
 ## Version history
+* 0.1.4 (June 2025) - It's now possible to translate certain codes for municipalities that were merged, but where the merger were later reversed. 
 * 0.1.3 (March 2025) - Some changes to in the underlying code to build the graph object from SSB data. This should make it easier to update the pacakge with more historical data and new changes in the future. Should be no changes for the user. 
 * 0.1.2 (January 2025) - Updated data from SSB (data was updated in September 2024). Results will sometimes be different from what they were in version 0.1.1, since some historical municipality mergers/splits/changes have been added to the data.
 * 0.1.1 - Faster code conversion. The function now re-uses results when input is duplicated, instead of traversing the graph multiple times.

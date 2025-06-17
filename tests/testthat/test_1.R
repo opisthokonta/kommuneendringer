@@ -74,8 +74,6 @@ test_that("Tysfjord", {
 
 
 
-
-
 # 1103 Stavanger, 1141 Finnøy and 1142 Rennesøy, Merged in year 2020, kept 1103 as knr.
 
 test_that("Stavanger", {
@@ -95,8 +93,6 @@ test_that("Stavanger", {
 })
 
 
-
-
 # 1804 Bodø and 1842 Skjerstad, merged in year 2005, kept Bodo's name and code.
 
 test_that("Bodo", {
@@ -109,7 +105,6 @@ test_that("Bodo", {
   expect_true(is.na(translate_knr(knr = '1804', from_date = '2005-05-17', to_date = '2004-02-11', show_warnings = FALSE)))
 
 })
-
 
 
 # Trondheim and Klaebu
@@ -139,10 +134,7 @@ test_that("Trondheim and Klaebu", {
 })
 
 
-
-
 # Re kommune, existed from 2002 - 2019. Merged with tønsberg 2020.
-
 
 test_that("Re and Tonsberg", {
 
@@ -177,7 +169,6 @@ test_that("Re and Tonsberg", {
   expect_true(translate_knr(knr = '0721', from_date = '1987-01-01', to_date = '2024-01-01') == '3905')
 
 })
-
 
 
 # Egersund, never changed name, county or code, never merged.
@@ -323,6 +314,7 @@ test_that("Stryn", {
   expect_true(is.na(translate_knr(knr = '1448', from_date = '1976-01-01', to_date = '1977-05-17', show_warnings = FALSE)))
 })
 
+
 # Ålesund split in 1977, and in 2024
 test_that("Ålesund", {
   # The 1977 split
@@ -338,7 +330,68 @@ test_that("Ålesund", {
   expect_true(translate_knr(knr = '1534', from_date = '2018-01-01', to_date = '2020-05-17') == '1507')
   expect_true(translate_knr(knr = '1546', from_date = '2018-01-01', to_date = '2020-05-17') == '1507')
 
+
+  # Check that the allow_reversals work when there is a split it can jump.
+  expect_true(translate_knr(knr = '1504', from_date = '2019-05-17', to_date = '2024-12-11', allow_reversals = TRUE) == '1508')
+  expect_true(translate_knr(knr = '1523', from_date = '2019-05-17', to_date = '2024-12-11', allow_reversals = TRUE) == '1508')
+  expect_true(translate_knr(knr = '1529', from_date = '2019-05-17', to_date = '2024-12-11', allow_reversals = TRUE) == '1508')
+  expect_true(translate_knr(knr = '1546', from_date = '2019-05-17', to_date = '2024-12-11', allow_reversals = TRUE) == '1508')
+
+  # Check that it wont work if allow_reversals = FALSE
+  expect_true(is.na(translate_knr(knr = '1504', from_date = '2019-05-17', to_date = '2024-12-11', allow_reversals = FALSE, show_warnings = FALSE)))
+  expect_true(is.na(translate_knr(knr = '1523', from_date = '2019-05-17', to_date = '2024-12-11', allow_reversals = FALSE, show_warnings = FALSE)))
+  expect_true(is.na(translate_knr(knr = '1529', from_date = '2019-05-17', to_date = '2024-12-11', allow_reversals = FALSE, show_warnings = FALSE)))
+  expect_true(is.na(translate_knr(knr = '1546', from_date = '2019-05-17', to_date = '2024-12-11', allow_reversals = FALSE, show_warnings = FALSE)))
+
+  # Check that allow_reversals work also when there is not a split.
+  expect_true(translate_knr(knr = '1546', from_date = '2019-05-17', to_date = '2023-12-11', allow_reversals = TRUE) == '1507')
+  expect_true(translate_knr(knr = '1529', from_date = '2019-05-17', to_date = '2023-12-11', allow_reversals = TRUE) == '1507')
+  expect_true(translate_knr(knr = '1504', from_date = '2019-05-17', to_date = '2023-12-11', allow_reversals = TRUE) == '1507')
+  expect_true(translate_knr(knr = '1523', from_date = '2019-05-17', to_date = '2023-12-11', allow_reversals = TRUE) == '1507')
+
+  # Check that there will be no fuss with allow_reversals = FALSE.
+  expect_true(translate_knr(knr = '1546', from_date = '2019-05-17', to_date = '2023-12-11', allow_reversals = FALSE) == '1507')
+  expect_true(translate_knr(knr = '1529', from_date = '2019-05-17', to_date = '2023-12-11', allow_reversals = FALSE) == '1507')
+  expect_true(translate_knr(knr = '1504', from_date = '2019-05-17', to_date = '2023-12-11', allow_reversals = FALSE) == '1507')
+  expect_true(translate_knr(knr = '1523', from_date = '2019-05-17', to_date = '2023-12-11', allow_reversals = FALSE) == '1507')
+
+
+
+
+
+
 })
+
+
+
+# Haram - Merged with Aalesund in 2020, split away in 2024.
+
+test_that("Haram", {
+
+  # Before 2020 merger
+  expect_true(translate_knr(knr = '1534', from_date = '2011-01-01', to_date = '2019-05-17') == '1534')
+
+  # The merger
+  expect_true(translate_knr(knr = '1534', from_date = '2018-01-01', to_date = '2020-05-17') == '1507')
+
+  # Across the merger and split. Default is NA.
+  expect_true(is.na(translate_knr(knr = '1534', from_date = '2018-01-01', to_date = '2024-05-17', show_warnings = FALSE)))
+
+  # allow_reversal across the split.
+  expect_true(translate_knr(knr = '1534', from_date = '2018-01-01', to_date = '2024-05-17', allow_reversals = TRUE) == '1580')
+
+  # Allow_reversal backwards in time
+  expect_true(translate_knr(knr = '1580', from_date = '2024-05-17', to_date = '2020-10-11', allow_reversals = FALSE)  == '1507')
+  expect_true(is.na(translate_knr(knr = '1580', from_date = '2024-05-17', to_date = '2019-10-11', allow_reversals = FALSE, show_warnings = FALSE)))
+  expect_true(translate_knr(knr = '1580', from_date = '2024-05-17', to_date = '2019-10-11', allow_reversals = TRUE) == '1534')
+
+  expect_true(translate_knr(knr = '1508', from_date = '2024-05-17', to_date = '2020-10-11', allow_reversals = FALSE)  == '1507')
+  expect_true(is.na(translate_knr(knr = '1508', from_date = '2024-05-17', to_date = '2019-10-11', allow_reversals = FALSE, show_warnings = FALSE)))
+
+})
+
+
+
 
 # 1527 Ørskog split in 1977.
 test_that("Ørskog", {
